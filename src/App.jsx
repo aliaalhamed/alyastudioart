@@ -129,13 +129,7 @@ export default function App() {
                 </button>
               );
             })}
-             <button 
-              onClick={() => setShowAI(true)}
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-4 py-2 rounded-full hover:shadow-lg transition-all flex items-center gap-2 animate-pulse hover:animate-none font-bold text-sm"
-            >
-              <Sparkles size={16} />
-              <span>جرب الذكاء الاصطناعي</span>
-            </button>
+         
             <a 
               href="https://wa.me/967701202010" 
               target="_blank" 
@@ -247,7 +241,7 @@ export default function App() {
                     </li>
                     <li className="flex items-center gap-3">
                       <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                      <span>بكالوريوس علوم حاسوب - جيد جداً</span>
+                      <span>بكالوريوس علوم حاسوباً</span>
                     </li>
                     <li className="flex items-center gap-3">
                       <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
