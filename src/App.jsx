@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Instagram, Mail, Phone, Palette, Video, PenTool, Layout, ArrowLeft, Download, ExternalLink, Brush, Layers, Sparkles, Lightbulb, Loader2 } from 'lucide-react';
+import { Menu, X, Instagram, Mail, Phone, Palette, Video, PenTool, Layout, ArrowLeft, Download, ExternalLink, Brush, Layers, Sparkles, Lightbulb, Loader2, Share2, Smartphone } from 'lucide-react';
 
 const PortfolioItem = ({ title, category, type, color }) => (
   <div className="group relative overflow-hidden rounded-xl shadow-lg bg-white transition-all hover:-translate-y-2 hover:shadow-2xl">
@@ -32,8 +32,13 @@ const PortfolioItem = ({ title, category, type, color }) => (
   </div>
 );
 
-const ServiceCard = ({ icon: Icon, title, description }) => (
-  <div className="bg-white p-8 rounded-2xl shadow-md border border-purple-50 hover:shadow-xl hover:border-purple-200 transition-all duration-300 text-center group">
+const ServiceCard = ({ icon: Icon, title, description, isNew }) => (
+  <div className={`bg-white p-8 rounded-2xl shadow-md border ${isNew ? 'border-purple-300 ring-2 ring-purple-100' : 'border-purple-50'} hover:shadow-xl hover:border-purple-200 transition-all duration-300 text-center group relative overflow-hidden`}>
+    {isNew && (
+      <div className="absolute top-4 left-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full animate-pulse">
+        جديد
+      </div>
+    )}
     <div className="w-16 h-16 bg-gradient-to-tr from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
       <Icon className="text-purple-700" size={32} />
     </div>
@@ -49,178 +54,6 @@ const TargetAudienceItem = ({ title }) => (
   </div>
 );
 
-// --- AI Component ---
-const AICreativeAssistant = ({ onClose }) => {
-  const [idea, setIdea] = useState('');
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const generateConcept = async () => {
-    if (!idea.trim()) return;
-    setLoading(true);
-    setError('');
-    setResult(null);
-
-    try {
-      const apiKey = ""; // Injected by environment
-      const prompt = `
-        Act as a professional creative director and graphic designer. 
-        The user will provide a short description of a project or business. 
-        You must generate a creative design brief in Arabic.
-        
-        User Input: "${idea}"
-        
-        Return ONLY a JSON object with the following structure (no markdown formatting):
-        {
-          "concept_title": "Short creative title in Arabic",
-          "visual_concept": "Description of the visual style and mood in Arabic (approx 30 words)",
-          "color_palette": ["Color 1", "Color 2", "Color 3"],
-          "suggested_elements": "Key visual elements to include (e.g., shapes, symbols) in Arabic",
-          "slogan_idea": "A catchy marketing slogan in Arabic"
-        }
-      `;
-
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json"
-          }
-        })
-      });
-
-      if (!response.ok) throw new Error('Failed to generate');
-
-      const data = await response.json();
-      const generatedText = data.candidates[0].content.parts[0].text;
-      setResult(JSON.parse(generatedText));
-
-    } catch (err) {
-      setError('حدث خطأ أثناء توليد الأفكار. حاول مرة أخرى.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-purple-700 to-pink-600 p-6 text-white flex justify-between items-center shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="bg-white/20 p-2 rounded-full">
-              <Sparkles className="w-6 h-6 text-yellow-300" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold">المساعد الإبداعي الذكي</h3>
-              <p className="text-purple-100 text-sm">دع الذكاء الاصطناعي يلهمك بفكرة مشروعك القادم</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="hover:bg-white/20 p-2 rounded-full transition-colors">
-            <X size={24} />
-          </button>
-        </div>
-
-        {/* Body */}
-        <div className="p-6 overflow-y-auto flex-1">
-          {!result ? (
-            <div className="flex flex-col gap-6">
-              <div className="text-center space-y-2">
-                <Lightbulb size={48} className="mx-auto text-yellow-500 mb-4" />
-                <h4 className="text-xl font-bold text-gray-800">صف فكرتك بكلمات بسيطة</h4>
-                <p className="text-gray-500">مثال: "متجر لبيع الزهور الطبيعية"، "تطبيق لتوصيل الطعام الصحي"، "شعار لشركة عقارات"</p>
-              </div>
-              
-              <div className="relative">
-                <textarea
-                  value={idea}
-                  onChange={(e) => setIdea(e.target.value)}
-                  placeholder="اكتب فكرتك هنا..."
-                  className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all outline-none min-h-[120px] text-lg resize-none"
-                />
-              </div>
-
-              <button
-                onClick={generateConcept}
-                disabled={loading || !idea.trim()}
-                className="w-full bg-gray-900 text-white py-4 rounded-xl font-bold text-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 shadow-lg"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="animate-spin" /> جاري التفكير...
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="text-yellow-400" /> توليد الفكرة الإبداعية
-                  </>
-                )}
-              </button>
-              {error && <p className="text-red-500 text-center">{error}</p>}
-            </div>
-          ) : (
-            <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-              <div className="bg-purple-50 p-6 rounded-2xl border border-purple-100">
-                <h3 className="text-2xl font-bold text-purple-900 mb-2">{result.concept_title}</h3>
-                <p className="text-gray-700 leading-relaxed">{result.visual_concept}</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                  <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <Palette size={18} className="text-pink-500" /> لوحة الألوان المقترحة
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {result.color_palette?.map((color, idx) => (
-                      <span key={idx} className="px-3 py-1 bg-gray-100 rounded-full text-sm font-medium text-gray-700 border border-gray-200">
-                        {color}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
-                  <h4 className="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <Layers size={18} className="text-purple-500" /> العناصر البصرية
-                  </h4>
-                  <p className="text-gray-600 text-sm">{result.suggested_elements}</p>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-gray-900 to-gray-800 p-6 rounded-2xl text-white text-center shadow-lg relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-20 h-20 bg-white opacity-10 rounded-full -mr-10 -mt-10"></div>
-                <h4 className="text-sm font-medium text-gray-400 mb-2 uppercase tracking-widest">شعار مقترح (Slogan)</h4>
-                <p className="text-2xl md:text-3xl font-serif font-bold italic">"{result.slogan_idea}"</p>
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button 
-                  onClick={() => setResult(null)} 
-                  className="flex-1 py-3 border border-gray-300 rounded-lg font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-                >
-                  فكرة جديدة 
-                </button>
-                <a 
-                  href={`https://wa.me/967701202010?text=مرحباً علياء، أعجبتني فكرة المشروع: ${result.concept_title}. أريد مناقشة تنفيذها معك.`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex-1 py-3 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors flex items-center justify-center gap-2 shadow-md shadow-green-200"
-                >
-                  <Phone size={18} /> تنفيذ الفكرة معي
-                </a>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 
 export default function App() {
@@ -367,10 +200,7 @@ export default function App() {
               <button onClick={() => scrollToSection('portfolio')} className="px-8 py-3 bg-gray-900 text-white rounded-full hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl">
                 شاهد أعمالي
               </button>
-              <button onClick={() => setShowAI(true)} className="px-8 py-3 bg-white text-purple-700 border-2 border-purple-100 rounded-full hover:border-purple-300 transition-all flex items-center justify-center gap-2 group">
-                 <Sparkles size={18} className="text-yellow-500 group-hover:rotate-12 transition-transform" />
-                 <span>ساعدني في فكرة</span>
-              </button>
+              
             </div>
           </div>
           
@@ -379,10 +209,13 @@ export default function App() {
                {/* Decorative elements simulating the provided brand style */}
               <div className="absolute inset-0 bg-gradient-to-tr from-purple-600 to-pink-400 rounded-[2rem] rotate-6 opacity-20"></div>
               <div className="absolute inset-0 bg-white rounded-[2rem] shadow-2xl flex items-center justify-center p-8 border border-purple-50">
-                 {/* This represents where the Logo or Personal Photo would go */}
-                 <div className="text-center">
-                    <h2 className="text-6xl font-serif text-purple-900 mb-2">alya</h2>
-                    <p className="text-gray-500 text-sm tracking-[0.2em] uppercase">Creative Studio</p>
+                 {/* Main Logo in Hero Section */}
+                 <div className="w-full h-full flex items-center justify-center p-4">
+                    <img 
+                      src="شعاري.png" 
+                      alt="Alya Creative Studio" 
+                      className="max-w-full max-h-full object-contain drop-shadow-md hover:scale-105 transition-transform duration-500"
+                    />
                  </div>
               </div>
               
@@ -421,9 +254,14 @@ export default function App() {
                       <span>خبرة في التدريب والعمل الحر منذ 2019</span>
                     </li>
                   </ul>
-                  <button className="mt-8 w-full py-3 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors flex items-center justify-center gap-2 font-medium">
+                  <a 
+                    href="https://drive.google.com/file/d/1FAbfAweF1HhbtMh1eVvGAcvezoX-111Z/view?usp=sharing"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-8 w-full py-3 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors flex items-center justify-center gap-2 font-medium"
+                  >
                     <Download size={18} /> تحميل السيرة الذاتية
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>
@@ -476,7 +314,7 @@ export default function App() {
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">الباقات والخدمات التصميمية</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
           <ServiceCard 
             icon={Palette}
             title="تصميم الشعارات والهويات"
@@ -496,6 +334,12 @@ export default function App() {
             icon={Layout}
             title="منشورات السوشيال ميديا"
             description="تصميم محتوى بصري جذاب لمنصات التواصل الاجتماعي يساعد على زيادة التفاعل والوصول."
+          />
+          <ServiceCard 
+            icon={Share2}
+            title="إدارة الحسابات والمحتوى"
+            description="خدمة متكاملة تشمل تخطيط المحتوى، كتابة النصوص، التصميم الإبداعي، والنشر وإدارة التفاعل لنمو حسابك."
+            isNew={true}
           />
         </div>
       </section>
@@ -582,7 +426,7 @@ export default function App() {
 
             <div className="mt-10 flex justify-center gap-6 pt-8 border-t border-white/10">
                {/* Social Icons Placeholder */}
-               <a href="#" className="w-12 h-12 rounded-full bg-white/10 hover:bg-purple-600 flex items-center justify-center transition-colors">
+               <a href="https://www.instagram.com/alia.studioart/" className="w-12 h-12 rounded-full bg-white/10 hover:bg-purple-600 flex items-center justify-center transition-colors">
                  <Instagram size={24} />
                </a>
                <a href="#" className="w-12 h-12 rounded-full bg-white/10 hover:bg-blue-600 flex items-center justify-center transition-colors">
